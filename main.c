@@ -5,54 +5,44 @@
 #include "usart.c"
 #include "twislave.c"
 
-enum registerState{
-	START,
-	FAN_A=0x00,
-	FAN_B=0x01,
-	LED=0x02,
-	ANIMATION=0x03
-};
-typedef enum registerState registerState_;
-registerState_ state = START;
-
-
-uint8_t read(){
-	return 0x43;
+void fanA(uint8_t* arg){
+	usart_write_str("command: fanA ");
+	usart_write_str((char*)arg);
+	usart_write_str("\n");
 }
 
-void write(uint8_t value){
-	if(state==START){
-		state=value;
-	}else{
-		
-	}
+void fanB(uint8_t* arg){
+	usart_write_str("command: fanB ");
+	usart_write_str((char*)arg);
+	usart_write_str("\n");
 }
 
-void fanA(*uint8_t arg){
-
+void led(uint8_t* arg){
+	usart_write_str("command: led ");
+	usart_write_str((char*)arg);
+	usart_write_str("\n");
 }
 
-void fanB(*uint8_t arg){
-	
+void animation(uint8_t* arg){
+	usart_write_str("command: animation ");
+	usart_write_str((char*)arg);
+	usart_write_str("\n");
 }
-
-void led(*uint8_t arg){
-
-}
-
-void
 
 
 int main(){
 	usart_init(9600);
 	_delay_ms(100);
 	usart_write_str("LED and Fan Control Board (C) 3Dator GmbH 2015\n");
+	usart_write_str("Firmware version 0.1\n");
+	usart_write_str("Compiled at "__DATE__" "__TIME__"\n");
 	
-	init_twi_slave(0x12,&write,&read);
+	init_twi_slave(0x12);
+	
+	twi_register_callback(0x10,&led,3);
+	twi_register_callback(0x11,&animation,2);
 	
 	while(1){
-		_delay_ms(1000);
-		usart_write_str("TEST2\n");
 	}
 	
 }
