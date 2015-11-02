@@ -4,29 +4,33 @@
 #include <math.h>
 #include "usart.c"
 #include "twislave.c"
+#include "fancontroller.c"
+
+#define miniDator 0 
+#define anlogLED 1
+
+#include "ledcontroller.c"
+
+
 
 void fanA(uint8_t* arg){
-	usart_write_str("command: fanA ");
-	usart_write_str((char*)arg);
-	usart_write_str("\n");
+	setSpeed(arg[0]);
+
 }
 
 void fanB(uint8_t* arg){
-	usart_write_str("command: fanB ");
-	usart_write_str((char*)arg);
-	usart_write_str("\n");
 }
 
 void led(uint8_t* arg){
-	usart_write_str("command: led ");
-	usart_write_str((char*)arg);
-	usart_write_str("\n");
+	#ifdef anlogLED
+		setColorAnalog(arg[0],arg[1],arg[2]);
+	#else
+		setColor(arg[0],arg[1],arg[2]);
+	#endif
 }
 
 void animation(uint8_t* arg){
-	usart_write_str("command: animation ");
-	usart_write_str((char*)arg);
-	usart_write_str("\n");
+	setAnimation(arg[0],arg[1]);
 }
 
 
@@ -42,7 +46,26 @@ int main(){
 	twi_register_callback(0x10,&led,3);
 	twi_register_callback(0x11,&animation,2);
 	
+	fanInit();
+	ledInit();
+	uint8_t i=0;
 	while(1){
+		/*
+		setColorAnalog(i,i,i);
+		i++;
+		setSpeed(255);
+		_delay_ms(20);*/
+		/*PORTB = 0;
+		PORTB = (1<< PB1);
+		_delay_ms(1000);
+		PORTB = 0;
+		PORTB = (1<< PB2);
+		_delay_ms(1000);
+		PORTB = 0;
+		PORTB = (1<< PB3);
+		
+		_delay_ms(1000);*/
 	}
 	
 }
+

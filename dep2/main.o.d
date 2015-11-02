@@ -10,7 +10,7 @@ main.o: main.c /usr/lib/avr/include/avr/io.h \
  /usr/lib/gcc/avr/4.8.1/include/stddef.h /usr/lib/avr/include/stdlib.h \
  /usr/lib/gcc/avr/4.8.1/include/stdarg.h /usr/lib/avr/include/ctype.h \
  /usr/lib/avr/include/string.h twislave.c /usr/lib/avr/include/util/twi.h \
- twislave.h
+ twislave.h fancontroller.c fancontroller.h ledcontroller.c
 
 /usr/lib/avr/include/avr/io.h:
 
@@ -63,3 +63,9 @@ twislave.c:
 /usr/lib/avr/include/util/twi.h:
 
 twislave.h:
+
+fancontroller.c:
+
+fancontroller.h:
+
+ledcontroller.c:

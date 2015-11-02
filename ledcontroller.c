@@ -62,7 +62,30 @@ void setColor(uint8_t r, uint8_t g, uint8_t b){
 	}
 	updateWS2812(leds,ledcount);
 }
+/*
+	this function is used for the non digital classical LED stripes
+*/
+void setColorAnalog(uint8_t r, uint8_t g, uint8_t b){
+	OCR2A = r;
+	OCR1A = g;
+	OCR1B = b;
+}
 
 void setAnimation(uint8_t animation, uint8_t option){
 	
+}
+
+void ledInit(){
+	#ifdef anlogLED
+		TCCR1A |= (1 << COM1A1) | (1 << COM1B1) | (1 << WGM10);
+		TCCR1B |= (1 << CS10);
+		
+		TCCR2A |= (1<<COM2A1) | (1<< WGM20);
+		TCCR2B |= (1<< CS20);
+		
+		DDRB |= (1<< PB3) | (1 << PB2) | (1 << PB1);
+		PORTD |=(1<< PB3) | (1 << PB2) | (1 << PB1);
+	#else
+		//updateWS2812(leds,ledcount);
+	#endif
 }
