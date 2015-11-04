@@ -3,13 +3,13 @@
 ###############################################################################
 
 ## General Flags
-PROJECT =test
+PROJECT =edator-extensionboard
 MCU = atmega328p
 
 ################
 
 
-TARGET = test.elf
+TARGET = dep/edator-extensionboard.elf
 CC = avr-gcc
 
 
@@ -30,7 +30,7 @@ ASMFLAGS += -x assembler-with-cpp -Wa,-gdwarf2
 
 ## Linker flags
 LDFLAGS = $(COMMON)
-LDFLAGS +=  -Wl,-Map=wetterstation.map
+LDFLAGS +=  -Wl,-Map=dep/map.map
 
 
 ## Intel Hex file production flags
@@ -48,7 +48,7 @@ OBJECTS = main.o
 LINKONLYOBJECTS = 
 
 ## Build
-all: $(TARGET) $(PROJECT).hex  $(PROJECT).eep  $(PROJECT).lss size
+all: $(TARGET) $(PROJECT).hex  $(PROJECT).eep dep/$(PROJECT).lss size
 
 ## Compile
 main.o:  main.c
@@ -74,7 +74,7 @@ size: ${TARGET}
 ## Clean target
 .PHONY: clean
 clean:
-	-rm -rf $(OBJECTS) $(PROJECT).elf dep2/*  $(PROJECT).hex  $(PROJECT).eep  $(PROJECT).lss  $(PROJECT).map
+	-rm -rf $(OBJECTS) $(PROJECT).elf dep/*  $(PROJECT).hex  $(PROJECT).eep  $(PROJECT).lss  $(PROJECT).map
 
 flash:   $(PROJECT).hex 
 	stty hupcl < /dev/ttyACM2; \
@@ -88,5 +88,5 @@ flash1: $(PROJECT).hex
 
 	
 ## Other dependencies
--include $(shell mkdir dep2 2>/dev/null) $(wildcard dep2/*)
+-include $(shell mkdir dep>/dev/null) $(wildcard dep2/*)
 
