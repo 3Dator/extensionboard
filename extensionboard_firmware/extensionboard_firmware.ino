@@ -5,7 +5,7 @@
 #endif
 
 #define PIN 8
-#define PIXEL 44
+#define PIXEL 54
 
 int oldColor;
 int newColor;
