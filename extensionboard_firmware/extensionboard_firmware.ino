@@ -23,6 +23,8 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL, PIN, NEO_GRB + NEO_KHZ800);
 void setup() {
   pinMode(fanBack,OUTPUT);
   pinMode(fanTop,OUTPUT);
+  TCCR1A |= (1<< WGM10) | (1 << COM1A1) | (1 << COM1B1) | (1 << COM1A0) | (1 << COM1B0);
+  TCCR1B |= (1<< CS10);
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
   Wire.begin(4);                // join i2c bus with address #4
@@ -157,20 +159,20 @@ void setFan(uint8_t fan,uint8_t fanspeed) {
 switch (fan){ 
   case 0:
     if(fanspeed>0){
-      analogWrite(fanTop,255);
+      OCR1A = 255;
       delay(1000);
-      analogWrite(fanTop,fanspeed);
+      OCR1A = fanspeed;
     }else{
-      analogWrite(fanTop,0);
+      OCR1B = 0;
     }
     break;
   case 1:
     if(fanspeed>0){
-      analogWrite(fanBack,255);
+      OCR1B = 255;
       delay(1000);
-      analogWrite(fanBack,fanspeed);
+      OCR1B = fanspeed;
     }else{
-      analogWrite(fanBack,0);
+      OCR1B = 0;
     }
     break;
   }
