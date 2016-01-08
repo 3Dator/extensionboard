@@ -17,6 +17,10 @@ uint8_t r=0;
 uint8_t g=0;
 uint8_t b=0;
 
+uint8_t r_old=0;
+uint8_t g_old=0;
+uint8_t b_old=0;
+
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL, PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
@@ -34,6 +38,11 @@ void loop() {
   delay(200);
 }
 
+//command:
+// 1 -> LEDs
+// 2 -> FANs
+
+//programm LEDs:
 // 1 -> fan1
 // 2 -> fan2
 // 3 -> fade leds
@@ -42,57 +51,63 @@ void loop() {
 // 6 -> move leds
 // 7 -> party modus
 
+//programm FANs:
+// 1 -> Fan1 normal mode
+// 2 -> Fan2 normal mode
+// 3 -> Fan1 PWM mode
+// 4 -> Fan2 PWM mode
+
 void receiveEvent(int howMany) {
   byte command = Wire.read();
+  byte programm = Wire.read();
   uint8_t values[3];
   uint8_t counter = 0;
   while (Wire.available()) { // loop through all
     values[counter] = Wire.read(); // receive byte
     counter++;
   }
-  
   switch(command){
-    case 1: {
-      setFan(0,values[0]);
-      break;
-    }
-    case 2: {
-      setFan(1,values[0]);
-      break;
-    }
-    case 3: {
-      colorFade(values[0], values[1], values[2],0);
+    //LEDs
+    case 1:
+      r_old = r;
+      g_old = g;
+      b_old = b;
       r = values[0];
       g = values[1];
       b = values[2];
+      switch(programm){
+        case 1: 
+          colorFade(values[0], values[1], values[2],0);
+          break;
+        case 2: 
+          colorWipe(strip.Color(values[0], values[1], values[2]),0);
+          break;
+        case 3: 
+          colorDown(strip.Color(values[0], values[1], values[2]),20);
+          break;
+        case 4: 
+          colorUp(strip.Color(values[0], values[1], values[2]),20);
+          break;
+        case 6: 
+          colorWipe(strip.Color(values[0], values[1], values[2]),20);
+          break;
+        case 7: 
+          rainbowCycle(10);
+          colorFade(r, g, b,0);
+          break;
+      }
       break;
-    }
-    case 4: {
-      colorWipe(strip.Color(values[0], values[1], values[2]),0);
-      r = values[0];
-      g = values[1];
-      b = values[2];
+    //FANs
+    case 2:
+      switch(programm){
+        case 1:
+          setFan(0,values[0]);
+          break;
+        case 2:
+          setFan(1,values[0]);
+          break;
+      }
       break;
-    }
-    case 5: {
-      colorDown(strip.Color(values[0], values[1], values[2]),30);
-      r = values[0];
-      g = values[1];
-      b = values[2];
-      break;
-    }
-    case 6: {
-      colorWipe(strip.Color(values[0], values[1], values[2]),30);
-      r = values[0];
-      g = values[1];
-      b = values[2];
-      break;
-    }
-    case 7: {
-      rainbowCycle(10);
-      colorFade(r, g, b,0);
-      break;
-    }
   }
 }
 
@@ -100,7 +115,7 @@ void colorFade(int new_r, int new_g, int new_b, uint8_t wait) {
   uint8_t steps = 100;
   uint32_t c;
   for(uint8_t s = 0;s<=steps;s++){
-    c = strip.Color(((new_r-r)/(float)steps)*s+r, ((new_g-g)/(float)steps)*s+g, ((new_b-b)/(float)steps)*s+b);
+    c = strip.Color(((new_r-r_old)/(float)steps)*s+r_old, ((new_g-g_old)/(float)steps)*s+g_old, ((new_b-b_old)/(float)steps)*s+b_old);
     for(uint8_t i=0; i<strip.numPixels(); i++) {
       strip.setPixelColor(i, c);
     }
@@ -119,7 +134,7 @@ void colorWipe(uint32_t c, uint8_t wait) {
 }
 
 void colorUp(uint32_t c, uint8_t wait) {
-  for(uint16_t i=0; i<(strip.numPixels()/2); i++) {
+  for(uint16_t i=0; i<=(strip.numPixels()/2); i++) {
     strip.setPixelColor(i, c);
     strip.setPixelColor(PIXEL-i, c);
     strip.show();
