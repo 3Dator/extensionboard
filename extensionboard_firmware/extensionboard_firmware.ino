@@ -13,9 +13,9 @@
 #define FAN_TOP OCR1A
 #define FAN_TOP_PIN 9
 
-int r=0;
-int g=0;
-int b=0;
+uint8_t r=0;
+uint8_t g=0;
+uint8_t b=0;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -44,8 +44,8 @@ void loop() {
 
 void receiveEvent(int howMany) {
   byte command = Wire.read();
-  int values[3];
-  int counter = 0;
+  uint8_t values[3];
+  uint8_t counter = 0;
   while (Wire.available()) { // loop through all
     values[counter] = Wire.read(); // receive byte
     counter++;
@@ -97,17 +97,16 @@ void receiveEvent(int howMany) {
 }
 
 void colorFade(int new_r, int new_g, int new_b, uint8_t wait) {
-  int steps = 10;
+  uint8_t steps = 100;
   uint32_t c;
-  for(int s = 0;s<=steps;s++){
-    c = strip.Color(((new_r-r)/steps)*s+r, ((new_g-g)/steps)*s+g, ((new_b-b)/steps)*s+b);
-    for(uint16_t i=0; i<strip.numPixels(); i++) {
+  for(uint8_t s = 0;s<=steps;s++){
+    c = strip.Color(((new_r-r)/(float)steps)*s+r, ((new_g-g)/(float)steps)*s+g, ((new_b-b)/(float)steps)*s+b);
+    for(uint8_t i=0; i<strip.numPixels(); i++) {
       strip.setPixelColor(i, c);
-      strip.show();
     }
+    strip.show();
     delay(wait);
   }
-  colorWipe(strip.Color(new_r, new_g, new_b),0);
 }
 
 void colorWipe(uint32_t c, uint8_t wait) {
