@@ -64,13 +64,14 @@ void receiveEvent(int howMany) {
 // 2 -> FANs
 
 //programm LEDs:
-// 1 -> fan1
-// 2 -> fan2
-// 3 -> fade leds
-// 4 -> instant leds
-// 5 -> move down
-// 6 -> move leds
+// 1 -> fade LEDs
+// 2 -> instant leds
+// 3 -> move down
+// 4 -> move up
+// 5 -> move/wipe leds
+// 6 -> jitter LEDs
 // 7 -> party modus
+// 8 -> snake
 
 //programm FANs:
 // 1 -> Fan1 normal mode
@@ -100,6 +101,13 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
           colorWipe(strip.Color(values[0], values[1], values[2]),20);
           break;
         case 6: 
+          colorJitter(strip.Color(values[0], values[1], values[2]),20);
+          break;
+        case 7: 
+          rainbowCycle(10);
+          colorInstant(strip.Color(r, g, b));
+          break;
+        case 8: 
           if(snake_active){
             snake_active = 0;
           }else{
@@ -107,12 +115,8 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
             snake_active = 1;
           }
           break;
-        case 7: 
-          rainbowCycle(10);
-          colorFade(r, g, b,0);
-          break;
       }
-      if(programm <=5){
+      if(programm <=7){
         r = values[0];
         g = values[1];
         b = values[2];
@@ -143,6 +147,31 @@ void colorFade(int new_r, int new_g, int new_b, uint8_t wait) {
     strip.show();
     delay(wait);
   }
+}
+
+void colorJitter(uint32_t c, uint8_t wait) {
+  colorInstant(c);
+  delay(wait/4);
+  colorInstant(strip.Color(r,g,b));
+  delay(wait*6);
+  colorInstant(c);
+  delay(wait/2);
+  colorInstant(strip.Color(r,g,b));
+  delay(wait*2);
+  colorInstant(c);
+  delay(wait*5);
+  colorInstant(strip.Color(r,g,b));
+  delay(wait/2);
+  colorInstant(c);
+  delay(wait*10);
+  colorInstant(strip.Color(r,g,b));
+  delay(wait/2);
+  colorInstant(c);
+  delay(wait/2);
+  colorInstant(strip.Color(r,g,b));
+  delay(wait/4);
+  colorInstant(c);
+  delay(wait);
 }
 
 void colorWipe(uint32_t c, uint8_t wait) {
