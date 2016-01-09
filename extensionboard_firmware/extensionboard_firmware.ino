@@ -13,13 +13,17 @@
 #define FAN_TOP OCR1A
 #define FAN_TOP_PIN 9
 
+uint32_t snake_color;
+bool snake_active = 0;
+
 uint8_t r=0;
 uint8_t g=0;
 uint8_t b=0;
 
-uint8_t r_old=0;
-uint8_t g_old=0;
-uint8_t b_old=0;
+byte command;
+byte programm;
+uint8_t values[3];
+bool new_action = 0;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -35,7 +39,24 @@ void setup() {
 }
 
 void loop() {
-  delay(200);
+  if(new_action){
+    perform_actions(command, programm, values);
+  }
+  if(snake_active){
+    colorSnake(snake_color,20);
+    delay(100);
+  }
+}
+
+void receiveEvent(int howMany) {
+  new_action = 1;
+  command = Wire.read();
+  programm = Wire.read();
+  uint8_t counter = 0;
+  while (Wire.available()) { // loop through all
+    values[counter] = Wire.read(); // receive byte
+    counter++;
+  }
 }
 
 //command:
@@ -57,30 +78,17 @@ void loop() {
 // 3 -> Fan1 PWM mode
 // 4 -> Fan2 PWM mode
 
-void receiveEvent(int howMany) {
-  byte command = Wire.read();
-  byte programm = Wire.read();
-  uint8_t values[3];
-  uint8_t counter = 0;
-  while (Wire.available()) { // loop through all
-    values[counter] = Wire.read(); // receive byte
-    counter++;
-  }
+void perform_actions(byte command, byte programm, uint8_t values[3]){
+  new_action = 0;
   switch(command){
     //LEDs
     case 1:
-      r_old = r;
-      g_old = g;
-      b_old = b;
-      r = values[0];
-      g = values[1];
-      b = values[2];
       switch(programm){
         case 1: 
           colorFade(values[0], values[1], values[2],0);
           break;
         case 2: 
-          colorWipe(strip.Color(values[0], values[1], values[2]),0);
+          colorInstant(strip.Color(values[0], values[1], values[2]));
           break;
         case 3: 
           colorDown(strip.Color(values[0], values[1], values[2]),20);
@@ -88,13 +96,26 @@ void receiveEvent(int howMany) {
         case 4: 
           colorUp(strip.Color(values[0], values[1], values[2]),20);
           break;
-        case 6: 
+        case 5: 
           colorWipe(strip.Color(values[0], values[1], values[2]),20);
+          break;
+        case 6: 
+          if(snake_active){
+            snake_active = 0;
+          }else{
+            snake_color = strip.Color(values[0], values[1], values[2]);
+            snake_active = 1;
+          }
           break;
         case 7: 
           rainbowCycle(10);
           colorFade(r, g, b,0);
           break;
+      }
+      if(programm <=5){
+        r = values[0];
+        g = values[1];
+        b = values[2];
       }
       break;
     //FANs
@@ -115,7 +136,7 @@ void colorFade(int new_r, int new_g, int new_b, uint8_t wait) {
   uint8_t steps = 100;
   uint32_t c;
   for(uint8_t s = 0;s<=steps;s++){
-    c = strip.Color(((new_r-r_old)/(float)steps)*s+r_old, ((new_g-g_old)/(float)steps)*s+g_old, ((new_b-b_old)/(float)steps)*s+b_old);
+    c = strip.Color(((new_r-r)/(float)steps)*s+r, ((new_g-g)/(float)steps)*s+g, ((new_b-b)/(float)steps)*s+b);
     for(uint8_t i=0; i<strip.numPixels(); i++) {
       strip.setPixelColor(i, c);
     }
@@ -125,12 +146,32 @@ void colorFade(int new_r, int new_g, int new_b, uint8_t wait) {
 }
 
 void colorWipe(uint32_t c, uint8_t wait) {
-  
   for(uint16_t i=0; i<strip.numPixels(); i++) {
     strip.setPixelColor(i, c);
     strip.show();
     delay(wait);
   }
+}
+
+void colorSnake(uint32_t c, uint8_t wait) {
+  uint8_t length = 10;
+  for(uint16_t i=0; i<strip.numPixels()+length; i++) {
+    if(i<strip.numPixels()){
+      strip.setPixelColor(i, c);
+    }
+    if(i>=length){
+      strip.setPixelColor(i-length, strip.Color(r,g,b));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+void colorInstant(uint32_t c) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(i, c);
+  }
+  strip.show();
 }
 
 void colorUp(uint32_t c, uint8_t wait) {
@@ -143,9 +184,9 @@ void colorUp(uint32_t c, uint8_t wait) {
 }
 
 void colorDown(uint32_t c, uint8_t wait) {
-  for(uint16_t i=(strip.numPixels()/2); i>=0; i--) {
+  for(uint16_t i=(strip.numPixels()/2); i>0; i--) {
     strip.setPixelColor(i-1, c);
-    strip.setPixelColor(PIXEL-i-1, c);
+    strip.setPixelColor(PIXEL-i, c);
     strip.show();
     delay(wait);
   }
