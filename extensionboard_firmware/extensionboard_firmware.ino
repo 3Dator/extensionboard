@@ -43,7 +43,7 @@ void loop() {
     perform_actions(command, programm, values);
   }
   if(snake_active){
-    colorSnake(snake_color,20);
+    colorSnake(snake_color,20,10);
     delay(100);
   }
 }
@@ -62,6 +62,7 @@ void receiveEvent(int howMany) {
 //command:
 // 1 -> LEDs
 // 2 -> FANs
+// 3 -> stuff
 
 //programm LEDs:
 // 1 -> fade LEDs
@@ -78,6 +79,10 @@ void receiveEvent(int howMany) {
 // 2 -> Fan2 normal mode
 // 3 -> Fan1 PWM mode
 // 4 -> Fan2 PWM mode
+
+//programm stuff
+// 1 -> Test mode
+// 2 -> demo mode
 
 void perform_actions(byte command, byte programm, uint8_t values[3]){
   new_action = 0;
@@ -133,6 +138,51 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
           break;
       }
       break;
+    //stuff
+    case 3:
+      switch(programm){
+        case 1:
+          colorInstant(0);
+          r = 0;
+          g = 0;
+          b = 0;
+          setFan(0,255);
+          delay(1000);
+          setFan(0,0);
+          delay(1000);
+          setFan(1,255);
+          delay(1000);
+          setFan(1,0);
+          delay(1000);
+          colorSnake(strip.Color(255,0,0),50,1);
+          colorSnake(strip.Color(0,255,0),50,1);
+          colorSnake(strip.Color(0,0,255),50,1);
+          colorInstant(strip.Color(255,0,0));
+          delay(1000);
+          colorInstant(strip.Color(0,255,0));
+          delay(1000);
+          colorInstant(strip.Color(0,0,255));
+          delay(1000);
+          break;
+        case 2:
+          setFan(0,200);
+          setFan(1,150);
+          colorUp(strip.Color(0,0,255),20);
+          colorDown(strip.Color(0,255,0),20);
+          colorUp(strip.Color(255,0,0),20);
+          colorDown(strip.Color(255,255,0),20);
+          colorUp(strip.Color(255,255,255),20);
+          colorDown(strip.Color(0,255,255),20);
+          colorUp(strip.Color(0,100,255),20);
+          colorDown(strip.Color(150,255,0),20);
+          colorSnake(strip.Color(255,255,255),30,5);
+          delay(1000);
+          rainbowCycle(10);
+          setFan(0,0);
+          setFan(1,0);
+          break;
+      }
+      break;
   }
 }
 
@@ -182,8 +232,7 @@ void colorWipe(uint32_t c, uint8_t wait) {
   }
 }
 
-void colorSnake(uint32_t c, uint8_t wait) {
-  uint8_t length = 10;
+void colorSnake(uint32_t c, uint8_t wait, uint8_t length) {
   for(uint16_t i=0; i<strip.numPixels()+length; i++) {
     if(i<strip.numPixels()){
       strip.setPixelColor(i, c);
