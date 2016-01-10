@@ -13,6 +13,10 @@
 #define FAN_TOP OCR1A
 #define FAN_TOP_PIN 9
 
+//manage pixel
+bool pixel_overwrite[PIXEL];
+uint32_t pixel_color[PIXEL];
+
 uint32_t snake_color;
 bool snake_active = 0;
 
@@ -22,7 +26,7 @@ uint8_t b=0;
 
 byte command;
 byte programm;
-uint8_t values[3];
+uint8_t values[6];
 bool new_action = 0;
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL, PIN, NEO_GRB + NEO_KHZ800);
@@ -62,7 +66,8 @@ void receiveEvent(int howMany) {
 //command:
 // 1 -> LEDs
 // 2 -> FANs
-// 3 -> stuff
+// 3 -> overwrite
+// 4 -> stuff
 
 //programm LEDs:
 // 1 -> fade LEDs
@@ -79,6 +84,12 @@ void receiveEvent(int howMany) {
 // 2 -> Fan2 normal mode
 // 3 -> Fan1 PWM mode
 // 4 -> Fan2 PWM mode
+
+//programm overwrite (pixels)
+// 1 -> single pixel
+// 2 -> single pixel stop overwrite
+// 3 -> range
+// 4 -> range stop overwrite
 
 //programm stuff
 // 1 -> Test mode
@@ -138,8 +149,47 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
           break;
       }
       break;
-    //stuff
+    //overwrite pixels
     case 3:
+      switch(programm){
+        case 1:
+          if(values[0] <= PIXEL){
+            //set pixel to overwrite with which color
+            pixel_overwrite[values[0]] = 1;
+            pixel_color[values[0]] = strip.Color(values[1], values[2], values[3]);
+            set_overwrite_pixel();
+          }
+          break;
+        case 2:
+          if(values[0] <= PIXEL){
+            //set pixel to overwrite with which color
+            pixel_overwrite[values[0]] = 0;
+            set_overwrite_pixel();
+          }
+          break;
+        case 3:
+          if(values[0] <= PIXEL and values[1] <= PIXEL and values[0] <= values[1]){
+            for(uint8_t i = values[0];i<=values[1];i++){
+              //set pixel to overwrite with which color
+              pixel_overwrite[i] = 1;
+              pixel_color[i] = strip.Color(values[2], values[3], values[4]);
+            }
+            set_overwrite_pixel();
+          }
+          break;
+        case 4:
+          if(values[0] <= PIXEL and values[1] <= PIXEL and values[0] <= values[1]){
+            for(uint8_t i = values[0];i<=values[1];i++){
+              //set pixel to overwrite with which color
+              pixel_overwrite[i] = 0;
+            }
+            set_overwrite_pixel();
+          }
+          break;
+      }
+      break;
+    //stuff
+    case 4:
       switch(programm){
         case 1:
           colorInstant(0);
@@ -186,13 +236,32 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
   }
 }
 
+//use this function instead of strip.setPixelColor to enable overwritten pixels
+void manage_pixel(uint16_t pixel, uint32_t color){
+  if(!pixel_overwrite[pixel]){
+    strip.setPixelColor(pixel, color);
+  }
+}
+
+//set all overwritten pixel to their color
+void set_overwrite_pixel(){
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    if(pixel_overwrite[i]){
+      strip.setPixelColor(i, pixel_color[i]);
+    }else{
+      strip.setPixelColor(i, strip.Color(r,g,b));
+    }
+  }
+  strip.show();
+}
+
 void colorFade(int new_r, int new_g, int new_b, uint8_t wait) {
   uint8_t steps = 100;
   uint32_t c;
   for(uint8_t s = 0;s<=steps;s++){
     c = strip.Color(((new_r-r)/(float)steps)*s+r, ((new_g-g)/(float)steps)*s+g, ((new_b-b)/(float)steps)*s+b);
     for(uint8_t i=0; i<strip.numPixels(); i++) {
-      strip.setPixelColor(i, c);
+      manage_pixel(i, c);
     }
     strip.show();
     delay(wait);
@@ -226,7 +295,7 @@ void colorJitter(uint32_t c, uint8_t wait) {
 
 void colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, c);
+    manage_pixel(i, c);
     strip.show();
     delay(wait);
   }
@@ -235,10 +304,10 @@ void colorWipe(uint32_t c, uint8_t wait) {
 void colorSnake(uint32_t c, uint8_t wait, uint8_t length) {
   for(uint16_t i=0; i<strip.numPixels()+length; i++) {
     if(i<strip.numPixels()){
-      strip.setPixelColor(i, c);
+      manage_pixel(i, c);
     }
     if(i>=length){
-      strip.setPixelColor(i-length, strip.Color(r,g,b));
+      manage_pixel(i-length, strip.Color(r,g,b));
     }
     strip.show();
     delay(wait);
@@ -247,15 +316,15 @@ void colorSnake(uint32_t c, uint8_t wait, uint8_t length) {
 
 void colorInstant(uint32_t c) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, c);
+    manage_pixel(i, c);
   }
   strip.show();
 }
 
 void colorUp(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<=(strip.numPixels()/2); i++) {
-    strip.setPixelColor(i, c);
-    strip.setPixelColor(PIXEL-i, c);
+    manage_pixel(i, c);
+    manage_pixel(PIXEL-i, c);
     strip.show();
     delay(wait);
   }
@@ -263,8 +332,8 @@ void colorUp(uint32_t c, uint8_t wait) {
 
 void colorDown(uint32_t c, uint8_t wait) {
   for(uint16_t i=(strip.numPixels()/2); i>0; i--) {
-    strip.setPixelColor(i-1, c);
-    strip.setPixelColor(PIXEL-i, c);
+    manage_pixel(i-1, c);
+    manage_pixel(PIXEL-i, c);
     strip.show();
     delay(wait);
   }
@@ -314,7 +383,7 @@ void rainbowCycle(uint8_t wait) {
 
   for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
     for(i=0; i< strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+      manage_pixel(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
     }
     strip.show();
     delay(wait);
