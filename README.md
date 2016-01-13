@@ -13,7 +13,7 @@ http://3dator.com
 http://wiki.3dator.com
 
 #how to use
-If you want to play arrount with the sourcecode on out board you need a ISP Programmer for that which is supported by Arduino IDE. (e.g. stk 500)
+If you want to play arrount with the sourcecode on your board you need a ISP Programmer which is supported by Arduino IDE. (e.g. stk 500)
 
 #License
 Please note that the material in this repository is licensed with the CC BY-NC-SA
