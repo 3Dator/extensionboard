@@ -20,6 +20,14 @@ uint32_t pixel_color[PIXEL];
 uint32_t snake_color;
 bool snake_active = 0;
 
+bool rainbow_active = 0;
+
+uint8_t pulse_color_r;
+uint8_t pulse_color_g;
+uint8_t pulse_color_b;
+
+bool pulse_active = 0;
+
 uint8_t r=0;
 uint8_t g=0;
 uint8_t b=0;
@@ -50,6 +58,12 @@ void loop() {
     colorSnake(snake_color,20,10);
     delay(100);
   }
+  if(rainbow_active){
+    rainbowCycle(10);
+  }
+  if(pulse_active){
+    colorPulse(pulse_color_r,pulse_color_g,pulse_color_b,5);
+  }
 }
 
 void receiveEvent(int howMany) {
@@ -76,8 +90,9 @@ void receiveEvent(int howMany) {
 // 4 -> move up
 // 5 -> move/wipe leds
 // 6 -> jitter LEDs
-// 7 -> party modus
-// 8 -> snake
+// 7 -> rainbow (toggle)
+// 8 -> snake (toggle)
+// 9 -> pulse (toggle)
 
 //programm FANs:
 // 1 -> Fan1 normal mode
@@ -120,8 +135,12 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
           colorJitter(strip.Color(values[0], values[1], values[2]),20);
           break;
         case 7: 
-          rainbowCycle(10);
-          colorInstant(strip.Color(r, g, b));
+          if(rainbow_active){
+            rainbow_active = 0;
+            colorInstant(strip.Color(r, g, b));
+          }else{
+            rainbow_active = 1;
+          }
           break;
         case 8: 
           if(snake_active){
@@ -131,8 +150,17 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
             snake_active = 1;
           }
           break;
+        case 9:
+          if(pulse_active){
+            pulse_active = 0;
+          }else{
+            pulse_color_r = values[0];
+            pulse_color_g = values[1];
+            pulse_color_b = values[2];
+            pulse_active = 1;
+          }
       }
-      if(programm <=7){
+      if(programm <= 6){
         r = values[0];
         g = values[1];
         b = values[2];
@@ -255,7 +283,24 @@ void set_overwrite_pixel(){
   strip.show();
 }
 
-void colorFade(int new_r, int new_g, int new_b, uint8_t wait) {
+void colorPulse(uint8_t color_r,uint8_t color_g,uint8_t color_b,uint8_t wait){
+  uint8_t old_r;
+  uint8_t old_g;
+  uint8_t old_b;
+  colorFade(color_r,color_g,color_b, wait);
+  old_r = r;
+  old_g = g;
+  old_b = b;
+  r = color_r;
+  g = color_g;
+  b = color_b;
+  colorFade(old_r,old_g,old_b, wait);
+  r = old_r;
+  g = old_g;
+  b = old_b;
+}
+
+void colorFade(uint8_t new_r, uint8_t new_g, uint8_t new_b, uint8_t wait) {
   uint8_t steps = 100;
   uint32_t c;
   for(uint8_t s = 0;s<=steps;s++){
@@ -381,7 +426,7 @@ switch (fan){
 void rainbowCycle(uint8_t wait) {
   uint16_t i, j;
 
-  for(j=0; j<256*5; j++) { // 5 cycles of all colors on wheel
+  for(j=0; j<256*1; j++) { // 1 cycle of all colors on wheel
     for(i=0; i< strip.numPixels(); i++) {
       manage_pixel(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
     }
