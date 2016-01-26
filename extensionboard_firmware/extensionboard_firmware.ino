@@ -401,21 +401,21 @@ void colorPulse(uint8_t wait) {
 void setFan(uint8_t fan,uint8_t fanspeed) {
 switch (fan){
   case 0:
-    if(fanspeed>0){
+    if(fanspeed>0 && fanspeed < 150 && FAN_BACK == 0){
       FAN_BACK = 255;
       delay(1000);
       FAN_BACK = fanspeed;
     }else{
-      FAN_BACK = 0;
+      FAN_BACK = fanspeed;
     }
     break;
   case 1:
-    if(fanspeed>0){
+    if(fanspeed>0 && fanspeed < 150 && FAN_TOP == 0){
       FAN_TOP = 255;
       delay(1000);
       FAN_TOP = fanspeed;
     }else{
-      FAN_TOP = 0;
+      FAN_TOP = fanspeed;
     }
     break;
   }
