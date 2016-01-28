@@ -20,13 +20,19 @@ uint32_t pixel_color[PIXEL];
 uint32_t snake_color;
 bool snake_active = 0;
 
+
 bool rainbow_active = 0;
+
 
 uint8_t pulse_color_r;
 uint8_t pulse_color_g;
 uint8_t pulse_color_b;
-
 bool pulse_active = 0;
+
+//0 means endless and 1 looping stopped all above indicates how often the effect will run
+byte snake_cycles = 0;
+byte rainbow_cycles = 0;
+byte pulse_cycles = 0;
 
 uint8_t r=0;
 uint8_t g=0;
@@ -54,14 +60,24 @@ void loop() {
   if(new_action){
     perform_actions(command, programm, values);
   }
-  if(snake_active){
+  //perform all looping animations. Perform endless if cycles 0 otherwise loop till cycle is 1
+  if(snake_active && snake_cycles != 1){
+    if(snake_cycles > 1){
+      snake_cycles--;
+    }
     colorSnake(snake_color,20,10);
     delay(100);
   }
-  if(rainbow_active){
+  if(rainbow_active && rainbow_cycles != 1){
+    if(rainbow_cycles > 1){
+      rainbow_cycles--;
+    }
     rainbowCycle(10);
   }
-  if(pulse_active){
+  if(pulse_active && pulse_cycles != 1){
+    if(pulse_cycles > 1){
+      pulse_cycles--;
+    }
     colorPulse(pulse_color_r,pulse_color_g,pulse_color_b,5);
   }
 }
@@ -90,9 +106,10 @@ void receiveEvent(int howMany) {
 // 4 -> move up
 // 5 -> move/wipe leds
 // 6 -> jitter LEDs
-// 7 -> rainbow (toggle)
-// 8 -> snake (toggle)
-// 9 -> pulse (toggle)
+// 7 -> rainbow (looping)
+// 8 -> snake (looping)
+// 9 -> pulse (looping)
+//10 -> turn off all looping
 
 //programm FANs:
 // 1 -> Fan1 normal mode
@@ -135,30 +152,30 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
           colorJitter(strip.Color(values[0], values[1], values[2]),20);
           break;
         case 7: 
-          if(rainbow_active){
-            rainbow_active = 0;
-            colorInstant(strip.Color(r, g, b));
-          }else{
-            rainbow_active = 1;
-          }
+          rainbow_cycles = values[3];
+          if(rainbow_cycles > 0) rainbow_cycles++;
+          turn_looping_off();
+          rainbow_active = 1;
           break;
         case 8: 
-          if(snake_active){
-            snake_active = 0;
-          }else{
-            snake_color = strip.Color(values[0], values[1], values[2]);
-            snake_active = 1;
-          }
+          snake_cycles = values[3];
+          if(snake_cycles > 0) snake_cycles++;
+          turn_looping_off();
+          snake_color = strip.Color(values[0], values[1], values[2]);
+          snake_active = 1;
           break;
         case 9:
-          if(pulse_active){
-            pulse_active = 0;
-          }else{
-            pulse_color_r = values[0];
-            pulse_color_g = values[1];
-            pulse_color_b = values[2];
-            pulse_active = 1;
-          }
+          pulse_cycles = values[3];
+          if(pulse_cycles > 0) pulse_cycles++;
+          turn_looping_off();
+          pulse_color_r = values[0];
+          pulse_color_g = values[1];
+          pulse_color_b = values[2];
+          pulse_active = 1;
+          break;
+        case 10:
+          turn_looping_off();
+          break;
       }
       if(programm <= 6){
         r = values[0];
@@ -262,6 +279,14 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
       }
       break;
   }
+}
+
+//turn all looping off
+void turn_looping_off(){
+  pulse_active = 0;
+  snake_active = 0;
+  rainbow_active = 0;
+  colorInstant(strip.Color(r, g, b));
 }
 
 //use this function instead of strip.setPixelColor to enable overwritten pixels
