@@ -176,6 +176,10 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
         case 10:
           turn_looping_off();
           break;
+        case 11:
+          strip.setBrightness(values[2]);
+          strip.show();
+          break;
       }
       if(programm <= 6){
         r = values[0];
