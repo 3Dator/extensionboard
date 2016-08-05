@@ -48,7 +48,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL, PIN, NEO_GRB + NEO_KHZ800);
 void setup() {
   pinMode(FAN_BACK_PIN,OUTPUT);
   pinMode(FAN_TOP_PIN,OUTPUT);
-  
+
   TCCR1A |= (1<< WGM10) | (1 << COM1A1) | (1 << COM1B1);
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
@@ -133,31 +133,31 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
     //LEDs
     case 1:
       switch(programm){
-        case 1: 
+        case 1:
           colorFade(values[0], values[1], values[2],0);
           break;
-        case 2: 
+        case 2:
           colorInstant(strip.Color(values[0], values[1], values[2]));
           break;
-        case 3: 
+        case 3:
           colorDown(strip.Color(values[0], values[1], values[2]),20);
           break;
-        case 4: 
+        case 4:
           colorUp(strip.Color(values[0], values[1], values[2]),20);
           break;
-        case 5: 
+        case 5:
           colorWipe(strip.Color(values[0], values[1], values[2]),20);
           break;
-        case 6: 
+        case 6:
           colorJitter(strip.Color(values[0], values[1], values[2]),20);
           break;
-        case 7: 
+        case 7:
           rainbow_cycles = values[3];
           if(rainbow_cycles > 0) rainbow_cycles++;
           turn_looping_off();
           rainbow_active = 1;
           break;
-        case 8: 
+        case 8:
           snake_cycles = values[3];
           if(snake_cycles > 0) snake_cycles++;
           turn_looping_off();
@@ -237,7 +237,7 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
           break;
       }
       break;
-    //stuff
+    //test programms
     case 4:
       switch(programm){
         case 1:
@@ -414,14 +414,14 @@ void colorDown(uint32_t c, uint8_t wait) {
 }
 
 void colorPulse(uint8_t wait) {
-    
+
     for(int i=0;i<255;i++){
     strip.setBrightness(i);
     strip.show();
     delay(wait/1000);
     }
     delay(wait);
-    
+
     strip.setBrightness(255);
     strip.show();
     delay(wait);
