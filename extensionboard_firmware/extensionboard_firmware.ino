@@ -110,6 +110,7 @@ void receiveEvent(int howMany) {
 // 8 -> snake (looping)
 // 9 -> pulse (looping)
 //10 -> turn off all looping
+//11 -> set brightness
 
 //programm FANs:
 // 1 -> Fan1 normal mode

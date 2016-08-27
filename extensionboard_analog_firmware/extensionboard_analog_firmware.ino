@@ -7,11 +7,11 @@
 #define PIN_G 9
 #define PIN_B 10
 
-#define FAN_BACK OCR1B
-#define FAN_BACK_PIN 10
+#define FAN_BACK_PIN 2
+#define FAN_TOP_PIN 3
 
-#define FAN_TOP OCR1A
-#define FAN_TOP_PIN 9
+byte fan_top = 0;
+byte fan_back = 0;
 
 bool rainbow_active = 0;
 
@@ -19,6 +19,7 @@ uint8_t pulse_color_r;
 uint8_t pulse_color_g;
 uint8_t pulse_color_b;
 bool pulse_active = 0;
+byte brightness = 255;
 
 //0 means endless and 1 looping stopped all above indicates how often the effect will run
 byte rainbow_cycles = 0;
@@ -34,6 +35,9 @@ uint8_t values[6];
 bool new_action = 0;
 
 void setup() {
+  Wire.begin(4);                // join i2c bus with address #4
+  Wire.onReceive(receiveEvent); // register event
+
   pinMode(FAN_BACK_PIN,OUTPUT);
   pinMode(FAN_TOP_PIN,OUTPUT);
 
@@ -41,8 +45,8 @@ void setup() {
   pinMode(PIN_G,OUTPUT);
   pinMode(PIN_B,OUTPUT);
 
-  Wire.begin(4);                // join i2c bus with address #4
-  Wire.onReceive(receiveEvent); // register event
+  //turn leds on when printer turns on
+  colorFade(255, 255, 255,5);
 }
 
 void loop() {
@@ -92,6 +96,7 @@ void receiveEvent(int howMany) {
 // 8 -> snake (looping)
 // 9 -> pulse (looping)
 //10 -> turn off all looping
+//11 -> set brightness
 
 //programm FANs:
 // 1 -> Fan1 normal mode
@@ -116,16 +121,16 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
     case 1:
       switch(programm){
         case 1:
-          colorFade(values[0], values[1], values[2],0);
+          colorFade(values[0], values[1], values[2],5);
           break;
         case 2:
           colorInstant(values[0], values[1], values[2]);
           break;
         case 3:
-          colorInstant(values[0], values[1], values[2]);
+          colorFade(values[0], values[1], values[2],5);
           break;
         case 4:
-          colorInstant(values[0], values[1], values[2]);
+          colorFade(values[0], values[1], values[2],5);
           break;
         case 5:
           colorInstant(values[0], values[1], values[2]);
@@ -152,7 +157,8 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
           turn_looping_off();
           break;
         case 11:
-          //todo implement brightness
+          brightness = values[2];
+          colorInstant(r, g, b);
           break;
       }
       if(programm <= 6){
@@ -165,10 +171,10 @@ void perform_actions(byte command, byte programm, uint8_t values[3]){
     case 2:
       switch(programm){
         case 1:
-          setFan(0,values[0]);
+          setFan(1,values[0]);
           break;
         case 2:
-          setFan(1,values[0]);
+          setFan(0,values[0]);
           break;
       }
       break;
@@ -215,11 +221,11 @@ void turn_looping_off(){
   colorInstant(r, g, b);
 }
 
-//use this function instead of strip.setPixelColor to enable overwritten pixels
+//use this function to manage the brightness
 void set_color(uint8_t r,uint8_t g,uint8_t b){
-  analogWrite(PIN_R,r);
-  analogWrite(PIN_G,g);
-  analogWrite(PIN_B,b);
+  analogWrite(PIN_R,(r/255.0)*brightness);
+  analogWrite(PIN_G,(g/255.0)*brightness);
+  analogWrite(PIN_B,(b/255.0)*brightness);
 }
 
 void colorPulse(uint8_t color_r,uint8_t color_g,uint8_t color_b,uint8_t wait){
@@ -230,9 +236,6 @@ void colorPulse(uint8_t color_r,uint8_t color_g,uint8_t color_b,uint8_t wait){
   old_r = r;
   old_g = g;
   old_b = b;
-  r = color_r;
-  g = color_g;
-  b = color_b;
   colorFade(old_r,old_g,old_b, wait);
   r = old_r;
   g = old_g;
@@ -254,22 +257,24 @@ void colorInstant(uint8_t new_r, uint8_t new_g, uint8_t new_b) {
 void setFan(uint8_t fan,uint8_t fanspeed) {
 switch (fan){
   case 0:
-    if(fanspeed>0 && fanspeed < 150 && FAN_BACK == 0){
-      FAN_BACK = 255;
+    if(fanspeed>0 && fanspeed < 150 && fan_back == 0){
+      analogWrite(FAN_BACK_PIN,255);
       delay(1000);
-      FAN_BACK = fanspeed;
+      analogWrite(FAN_BACK_PIN,fanspeed);
     }else{
-      FAN_BACK = fanspeed;
+      analogWrite(FAN_BACK_PIN,fanspeed);
     }
+    fan_back = fanspeed;
     break;
   case 1:
-    if(fanspeed>0 && fanspeed < 150 && FAN_TOP == 0){
-      FAN_TOP = 255;
+    if(fanspeed>0 && fanspeed < 150 && fan_top == 0){
+      analogWrite(FAN_TOP_PIN,255);
       delay(1000);
-      FAN_TOP = fanspeed;
+      analogWrite(FAN_TOP_PIN,fanspeed);
     }else{
-      FAN_TOP = fanspeed;
+      analogWrite(FAN_TOP_PIN,fanspeed);
     }
+    fan_top = fanspeed;
     break;
   }
 }
