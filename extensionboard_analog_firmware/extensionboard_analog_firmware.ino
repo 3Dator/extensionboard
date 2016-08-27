@@ -4,8 +4,8 @@
 #endif
 
 #define PIN_R 11
-#define PIN_G 9
-#define PIN_B 10
+#define PIN_G 10
+#define PIN_B 9
 
 #define FAN_BACK_PIN 2
 #define FAN_TOP_PIN 3
@@ -279,26 +279,26 @@ switch (fan){
   }
 }
 
-// Slightly different, this makes the rainbow equally distributed throughout
 void rainbowCycle(uint8_t wait) {
-  uint16_t i, j;
-  for(j=0; j<256*1; j++) { // 1 cycle of all colors on wheel
-    Wheel(1);
-    delay(wait);
+  byte rgbColour[3];
+  
+  // Start off with red.
+  rgbColour[0] = 255;
+  rgbColour[1] = 0;
+  rgbColour[2] = 0;  
+
+  // Choose the colours to increment and decrement.
+  for (int decColour = 0; decColour < 3; decColour += 1) {
+    int incColour = decColour == 2 ? 0 : decColour + 1;
+
+    // cross-fade the two colours.
+    for(int i = 0; i < 255; i += 1) {
+      rgbColour[decColour] -= 1;
+      rgbColour[incColour] += 1;
+      
+      set_color(rgbColour[0], rgbColour[1], rgbColour[2]);
+      delay(wait);
+    }
   }
 }
 
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-void Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if(WheelPos < 85) {
-    set_color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if(WheelPos < 170) {
-    WheelPos -= 85;
-    set_color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  set_color(WheelPos * 3, 255 - WheelPos * 3, 0);
-}
