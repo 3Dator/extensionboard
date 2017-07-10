@@ -7433,10 +7433,8 @@ temperature compensated, 6,2 V</description>
 <part name="P+9" library="supply1" deviceset="+5V" device=""/>
 <part name="VDD1" library="supply1" deviceset="VDD" device=""/>
 <part name="VDD2" library="supply1" deviceset="VDD" device=""/>
-<part name="D1" library="diode" deviceset="1N821" device=""/>
-<part name="D2" library="diode" deviceset="1N821" device=""/>
-<part name="P+4" library="supply1" deviceset="+12V" device=""/>
-<part name="P+6" library="supply1" deviceset="+12V" device=""/>
+<part name="D1" library="diode" deviceset="1N821" device="" value="1N5819"/>
+<part name="D2" library="diode" deviceset="1N821" device="" value="1N5819"/>
 </parts>
 <sheets>
 <sheet>
@@ -7478,10 +7476,8 @@ temperature compensated, 6,2 V</description>
 <instance part="P+9" gate="1" x="-7.62" y="66.04" rot="R270"/>
 <instance part="VDD1" gate="G$1" x="0" y="25.4"/>
 <instance part="VDD2" gate="G$1" x="-27.94" y="-7.62" rot="R180"/>
-<instance part="D1" gate="1" x="-35.56" y="35.56"/>
-<instance part="D2" gate="1" x="-10.16" y="35.56"/>
-<instance part="P+4" gate="1" x="-25.4" y="35.56" rot="R270"/>
-<instance part="P+6" gate="1" x="-2.54" y="35.56" rot="R270"/>
+<instance part="D1" gate="1" x="-27.94" y="50.8" rot="R90"/>
+<instance part="D2" gate="1" x="-22.86" y="63.5" rot="R180"/>
 </instances>
 <busses>
 </busses>
@@ -7491,9 +7487,13 @@ temperature compensated, 6,2 V</description>
 <pinref part="JP4" gate="G$1" pin="1"/>
 <pinref part="T1" gate="G$1" pin="C"/>
 <wire x1="-38.1" y1="50.8" x2="-33.02" y2="50.8" width="0.1524" layer="91"/>
-<wire x1="-33.02" y1="50.8" x2="-33.02" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="-33.02" y1="50.8" x2="-33.02" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="-33.02" y1="48.26" x2="-33.02" y2="45.72" width="0.1524" layer="91"/>
 <wire x1="-33.02" y1="45.72" x2="-48.26" y2="45.72" width="0.1524" layer="91"/>
 <wire x1="-48.26" y1="45.72" x2="-48.26" y2="40.64" width="0.1524" layer="91"/>
+<pinref part="D1" gate="1" pin="A"/>
+<wire x1="-27.94" y1="48.26" x2="-33.02" y2="48.26" width="0.1524" layer="91"/>
+<junction x="-33.02" y="48.26"/>
 </segment>
 </net>
 <net name="N$4" class="0">
@@ -7501,19 +7501,29 @@ temperature compensated, 6,2 V</description>
 <pinref part="JP5" gate="G$1" pin="1"/>
 <pinref part="T2" gate="G$1" pin="C"/>
 <wire x1="-38.1" y1="68.58" x2="-20.32" y2="68.58" width="0.1524" layer="91"/>
-<wire x1="-20.32" y1="68.58" x2="-20.32" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="-20.32" y1="68.58" x2="-20.32" y2="63.5" width="0.1524" layer="91"/>
+<pinref part="D2" gate="1" pin="A"/>
+<wire x1="-20.32" y1="63.5" x2="-20.32" y2="40.64" width="0.1524" layer="91"/>
+<junction x="-20.32" y="63.5"/>
 </segment>
 </net>
 <net name="+12V" class="0">
 <segment>
-<wire x1="-33.02" y1="53.34" x2="-33.02" y2="71.12" width="0.1524" layer="91"/>
+<wire x1="-33.02" y1="53.34" x2="-33.02" y2="63.5" width="0.1524" layer="91"/>
 <pinref part="P+1" gate="1" pin="+12V"/>
 <pinref part="JP5" gate="G$1" pin="2"/>
+<wire x1="-33.02" y1="63.5" x2="-33.02" y2="71.12" width="0.1524" layer="91"/>
 <wire x1="-33.02" y1="71.12" x2="-33.02" y2="81.28" width="0.1524" layer="91"/>
 <wire x1="-38.1" y1="71.12" x2="-33.02" y2="71.12" width="0.1524" layer="91"/>
 <junction x="-33.02" y="71.12"/>
 <pinref part="JP4" gate="G$1" pin="2"/>
 <wire x1="-33.02" y1="53.34" x2="-38.1" y2="53.34" width="0.1524" layer="91"/>
+<pinref part="D1" gate="1" pin="C"/>
+<wire x1="-27.94" y1="53.34" x2="-33.02" y2="53.34" width="0.1524" layer="91"/>
+<pinref part="D2" gate="1" pin="C"/>
+<wire x1="-25.4" y1="63.5" x2="-33.02" y2="63.5" width="0.1524" layer="91"/>
+<junction x="-33.02" y="63.5"/>
+<junction x="-33.02" y="53.34"/>
 </segment>
 <segment>
 <pinref part="JP1" gate="G$1" pin="3"/>
@@ -7523,16 +7533,6 @@ temperature compensated, 6,2 V</description>
 <segment>
 <pinref part="JP6" gate="G$1" pin="4"/>
 <pinref part="P+5" gate="1" pin="+12V"/>
-</segment>
-<segment>
-<pinref part="D1" gate="1" pin="C"/>
-<pinref part="P+4" gate="1" pin="+12V"/>
-<wire x1="-33.02" y1="35.56" x2="-27.94" y2="35.56" width="0.1524" layer="91"/>
-</segment>
-<segment>
-<pinref part="D2" gate="1" pin="C"/>
-<pinref part="P+6" gate="1" pin="+12V"/>
-<wire x1="-5.08" y1="35.56" x2="-7.62" y2="35.56" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -7607,20 +7607,6 @@ temperature compensated, 6,2 V</description>
 <wire x1="-33.02" y1="43.18" x2="-43.18" y2="43.18" width="0.1524" layer="91"/>
 <wire x1="-43.18" y1="43.18" x2="-43.18" y2="35.56" width="0.1524" layer="91"/>
 <pinref part="R1" gate="G$1" pin="1"/>
-<pinref part="D1" gate="1" pin="A"/>
-<junction x="-43.18" y="35.56"/>
-<wire x1="-43.18" y1="35.56" x2="-38.1" y2="35.56" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="N$6" class="0">
-<segment>
-<pinref part="T2" gate="G$1" pin="B"/>
-<wire x1="-7.62" y1="43.18" x2="-12.7" y2="43.18" width="0.1524" layer="91"/>
-<wire x1="-12.7" y1="43.18" x2="-12.7" y2="35.56" width="0.1524" layer="91"/>
-<pinref part="R2" gate="G$1" pin="1"/>
-<pinref part="D2" gate="1" pin="A"/>
-<junction x="-12.7" y="35.56"/>
-<wire x1="-12.7" y1="35.56" x2="-15.24" y2="35.56" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$8" class="0">
@@ -7709,6 +7695,14 @@ temperature compensated, 6,2 V</description>
 <segment>
 <pinref part="JP6" gate="G$1" pin="1"/>
 <pinref part="VDD2" gate="G$1" pin="VDD"/>
+</segment>
+</net>
+<net name="N$2" class="0">
+<segment>
+<pinref part="R2" gate="G$1" pin="1"/>
+<wire x1="-7.62" y1="43.18" x2="-12.7" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="-12.7" y1="43.18" x2="-12.7" y2="35.56" width="0.1524" layer="91"/>
+<wire x1="-12.7" y1="35.56" x2="-15.24" y2="35.56" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
