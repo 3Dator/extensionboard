@@ -1,4 +1,4 @@
-The 3Dator extension board firmware is licensed with the CC BY-NC-SA
+The 3Dator extension board firmware is licensed with the CC BY-SA
 
 http://creativecommons.org/licenses/by-nc-sa/4.0/
 
